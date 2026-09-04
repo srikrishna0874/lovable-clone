@@ -2,8 +2,8 @@ package com.springboot.lovable_clone.dto.subscription;
 
 public record PlanLimitResponse(
         String planName,
-        int maxTokensPerDay,
-        int maxProjects,
+        Integer maxTokensPerDay,
+        Integer maxProjects,
         boolean unlimitedAi
 ) {
 }
