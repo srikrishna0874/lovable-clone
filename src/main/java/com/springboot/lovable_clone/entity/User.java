@@ -24,11 +24,9 @@ public class User {
 
     String name;
 
-    String email;
+    String username;
 
-    String passwordHash;
-
-    String avatarUrl;
+    String password;
 
     @CreationTimestamp
     Instant createdAt;
