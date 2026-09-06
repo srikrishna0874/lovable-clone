@@ -9,14 +9,14 @@ import com.springboot.lovable_clone.mapper.ProjectMapper;
 import com.springboot.lovable_clone.repository.ProjectRepository;
 import com.springboot.lovable_clone.repository.UserRepository;
 import com.springboot.lovable_clone.service.ProjectService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +42,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getProjectById(Long id, Long userId) {
-        return null;
+
+        Project project = getAccessibleProjectById(id, userId);
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
@@ -62,11 +64,35 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
-        return null;
+
+        Project project = getAccessibleProjectById(id, userId);
+
+        if (!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("You are not allowed to update the name");
+        }
+
+        project.setName(request.name());
+        project = projectRepository.save(project);
+
+        return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDeleteProject(Long id, Long userId) {
 
+        Project project = getAccessibleProjectById(id, userId);
+        if (!project.getOwner().getId().equals(userId)) {
+            throw new RuntimeException("You are not allowed to delete this project");
+        }
+
+        project.setDeletedAt(Instant.now());
+        projectRepository.save(project);
+
     }
+
+    public Project getAccessibleProjectById(Long id, Long userId) {
+        return projectRepository.findAccessibleProjectById(id, userId).orElseThrow();
+    }
+
+
 }
